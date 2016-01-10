@@ -7,6 +7,7 @@ import play.*;
 import play.libs.Comet;
 import play.mvc.*;
 
+import play.mvc.WebSocket;
 import play.twirl.api.Html;
 import views.html.*;
 
@@ -81,7 +82,7 @@ public class Application extends Controller {
     }
 
     Comet comet = null;
-    ArrayList<ChatConnection> connections = new ArrayList<ChatConnection>();
+    ArrayList<ChatConnection> connections = new ArrayList<>();
 
     public Result cometChat() {
         return ok(cometMessages.render("CometChat"));
@@ -94,11 +95,7 @@ public class Application extends Controller {
     public Result getComet() {
         ChatConnection c = new ChatConnection(request().remoteAddress());
 
-        Runnable r = new Runnable() {
-            public void run() {
-                connections.remove(c);
-            }
-        };
+        Runnable r = () ->  connections.remove(c);
         Logger.debug("cometAdded");
         c.activate(r);
 
@@ -119,4 +116,37 @@ public class Application extends Controller {
         return ok();
     }
 
+    ArrayList<ChatWSConnection> wSConnections = new ArrayList<>();
+
+    public Result webChat(){
+        return ok(webMessages.render("WebSocket Chat"));
+    }
+
+    public WebSocket<String> getWebSocket() {
+        ChatWSConnection c = new ChatWSConnection(request().remoteAddress());
+        wSConnections.add(c);
+
+        Runnable r = () ->  wSConnections.remove(c);
+
+        Logger.debug("WebSocket Added");
+        c.activate(r);
+
+        return c.socket;
+    }
+
+    public Result webCheck() {
+        return ok(messages.render("Connections", "" + wSConnections.size()));
+    }
+
+    public Result webSendMessage(String msg) {
+        ChatUser u = ChatUser.getUser(request().remoteAddress());
+        ChatMessage m = new ChatMessage(u, msg);
+        m.save();
+
+        for(ChatWSConnection c : wSConnections) {
+            c.send(m);
+        }
+
+        return ok();
+    }
 }
