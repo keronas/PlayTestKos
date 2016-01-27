@@ -1,10 +1,12 @@
 package controllers;
 
+import com.avaje.ebean.OrderBy;
 import models.ChatMessage;
 import models.ChatUser;
 import models.TestUser;
 import play.*;
 import play.libs.Comet;
+import play.libs.Json;
 import play.mvc.*;
 
 import play.mvc.WebSocket;
@@ -148,5 +150,22 @@ public class Application extends Controller {
         }
 
         return ok();
+    }
+
+    public Result wJsMessage() {
+        ChatMessage m = new ChatMessage(Json.fromJson(request().body().asJson().get("sender"), ChatUser.class), request().body().asJson().get("message").asText());
+        m.save();
+        for(ChatWSConnection c : wSConnections) {
+            c.send(m);
+        }
+        return ok();
+    }
+
+    public Result jsUser() {
+        return ok(Json.toJson(ChatUser.getUser(request().remoteAddress())));
+    }
+
+    public Result jsMessage() {
+        return ok(Json.toJson(ChatMessage.find.orderBy("id desc").setMaxRows(10).findList()));
     }
 }
