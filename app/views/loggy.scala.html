@@ -1,0 +1,31 @@
+@import java.util
+@(logs: util.LinkedList[LoggyError])
+
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <title>Error Log</title>
+    </head>
+    <body>
+        <h2> <a style="color:royalblue" href="logs/deleteAll">Delete All</a> </h2>
+        <ol>
+            @logs.zipWithIndex.map { case (log, id) =>
+                <li>
+                    <h4>
+                        @log.getSummmary()
+
+                        @if(log.url != null) {
+                            <span style="color:green"> Reported (<a style="color:royalblue" target=_blank href=@log.url> View </a>) </span>
+                        } else {
+                            <a style="color:royalblue" href="logs/upload/@id"> Report to Youtrack </a>
+                        }
+                    </h4>
+                    @log.getDescription()
+                    <br>
+                </li>
+            }
+        </ol>
+    </body>
+</html>
+

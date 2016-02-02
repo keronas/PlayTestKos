@@ -24,7 +24,7 @@ public class Application extends Controller {
     }
 
     public Result secret() {
-        return ok(index.render("wow such secret very hidden", "http://i.imgur.com/PLOEqVE.jpg"));
+        return ok(index.render(Play.application().configuration().getString("confTest"), "http://i.imgur.com/PLOEqVE.jpg"));
     }
 
     public Result addUser(String mail, String name, String password) {
@@ -167,5 +167,14 @@ public class Application extends Controller {
 
     public Result jsMessage() {
         return ok(Json.toJson(ChatMessage.find.orderBy("id desc").setMaxRows(10).findList()));
+    }
+
+    public Result createErrors() {
+        Loggy.error("Test error description", "Test Error");
+        Loggy.error("Test error description", "Test Error");
+        Loggy.error("Test error description", "Another Test Error");
+        Loggy.error("Description only error");
+
+        return redirect("/logs");
     }
 }
