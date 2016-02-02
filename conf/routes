@@ -23,7 +23,7 @@ GET     /jsMes                      controllers.Application.jsMessage()
 GET     /logs                       controllers.Loggy.mainView()
 GET     /logs/upload/*id            controllers.Loggy.upload(id)
 GET     /logs/deleteAll             controllers.Loggy.deleteAll()
-GET     /logs/error/*summary/*desc  controllers.Loggy.logRequest(summary, desc)
+GET     /logs/error/*summary/*desc  controllers.Loggy.errorRequest(summary, desc)
 GET     /logs/createErrors          controllers.Application.createErrors()
 
 # Map static resources from the /public folder to the /assets URL path

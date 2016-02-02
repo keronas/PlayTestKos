@@ -27,16 +27,21 @@ public class Loggy extends Controller {
     }
 
     public Result mainView() {
-        //error("Not actually an error...", "Test Error");
         return ok(loggy.render(errors));
     }
 
     public Promise<Result> upload(String id) {
-        /*if (!StringUtils.isNumeric(id)) {
-            return badRequest();
-        }*/
 
-        LoggyError e = errors.get(Integer.parseInt(id));
+        if (!StringUtils.isNumeric(id)) {
+            return Promise.promise(() -> badRequest());
+        }
+        int eId = Integer.parseInt(id);
+
+        if (errors.size() <= eId) {
+            return Promise.promise(() -> badRequest());
+        }
+
+        LoggyError e = errors.get(eId);
 
         WSRequest request = ws.url(Play.application().configuration().getString("loggy.youtrackurl") + "/rest/issue");
         request.setQueryParameter("project", Play.application().configuration().getString("loggy.project"));
@@ -52,8 +57,8 @@ public class Loggy extends Controller {
         return redirect("/logs");
     }
 
-    public Result logRequest(String s, String d) {
-        error(d, s);
+    public Result errorRequest(String summary, String description) {
+        error(description, summary);
         return redirect("/logs");
     }
 
